@@ -1,0 +1,397 @@
+resultdirectory=./results/
+
+
+#Executable utilise
+df="/bin/df"
+dfoptions="-TP"
+ifconfig="/sbin/ifconfig"
+
+
+
+#constante
+ext=".dix"
+#Identificater unique de la machine (Hostname). Celui-ci doit Ãªtre unique!!!!!!!!!!!!!!!!!!!!!!!!
+
+HOSTNAME=`hostname|awk -F"." '{print $1}'`
+id=$HOSTNAME
+resultfile=${resultdirectory}${id}
+logfile=${resultdirectory}${id}#log${ext}
+errorfile=NULL
+
+#exec 2>&-
+#exec 2>./results/${id}#.err
+
+if test -r ./results; then 
+echo
+else
+mkdir ./results
+	fi
+
+date >${logfile}
+
+#OS
+if test -f /etc/debian_version; then
+	EZV_OS="Debian `cat /etc/debian_version`"
+	echo Debian >>${logfile}
+fi
+
+if test -f /etc/mandrake-release; then
+	EZV_OS="Mandrake"
+	echo Mandrake >>${logfile}
+fi
+
+if test -f /etc/redhat-release; then
+	EZV_OS=`cat /etc/redhat-release`
+	echo redhat >>${logfile}
+fi
+
+if test -f /etc/SuSE-release; then
+	EZV_OS=`cat /etc/SuSE-release`
+	echo suse >>${logfile}
+fi
+
+if test -f /etc/slackware-version; then
+	EZV_OS="Slackware"
+	echo slackware >>${logfile}
+fi
+
+if test -f /etc/knoppix_version; then
+	EZV_OS="Knoppix"
+	echo knoppix >>${logfile}
+fi
+
+if test -f /etc/trustix-release; then
+	EZV_OS="Trustix"
+	echo Trustix >>${logfile}
+fi
+
+if test -f /etc/lsd-release; then
+	EZV_OS=`cat /etc/lsd-release`
+	echo Unboutu >>${logfile}
+fi
+
+uname_result=`uname`
+ 
+echo ${uname_result}
+
+case ${uname_result} in
+SunOS)
+	###########################################################
+	#  SOLARIS
+	###########################################################
+	#uname
+
+	echo uname -a >>${logfile}
+	OSVERSION=`uname -a`
+	echo ${OSVERSION} >>${logfile}
+
+	#set
+	echo set >>${logfile}
+	set >${resultfile}#set${ext}
+
+	#partitions
+	echo df >>${logfile}
+	df -ak >${resultfile}#solarispart${ext} 
+
+	#configuration reseaux
+	echo ifconfig >>${logfile}
+	ifconfig -a > ${resultfile}#solarisif${ext}  
+
+	echo mem >>${logfile}
+	#memory
+	echo prtconf >>${logfile}
+	prtconf | grep Memory  > ${resultfile}#solarismem${ext}  
+
+	#X
+	Xfile="nofile"
+	if test -f "/etc/X11/XF86Config"; then
+		Xfile="/etc/X11/XF86Config"
+	elif test -f "/etc/X11/XF86Config-4"; then
+		Xfile="/etc/X11/XF86Config-4"
+	elif test -f "/etc/XF86Config"; then
+		Xfile="/etc/XF86Config"
+	elif test -f "/etc/XConfig"; then
+		Xfile="/etc/XConfig"
+	elif test -f "/usr/X11/lib/X11/XF86Config"; then
+		Xfile="/usr/X11/lib/X11/XF86Config"
+	fi
+	echo X >>${logfile}
+	echo ${Xfile} >>${logfile}
+	if test -f ${Xfile}; then 
+		cat ${Xfile} >${resultfile}#Xfile${ext}  
+	fi
+
+	#cpu
+
+	echo cpu >>${logfile}
+
+	echo psrinfo -p -v >>${logfile}
+	psrinfo -p -v > ${resultfile}#solariscpu${ext}  
+
+	#dmidecode
+	echo dmidecxode >>${logfile}
+	dmidecode >${resultfile}#dmi${ext} 
+
+	#resolv.conf
+	echo resolv.conf >>${logfile}
+	cat /etc/resolv.conf >${resultfile}#resolv${ext} 
+
+	echo whoami >>${logfile}
+	whoami >${resultfile}#whoami${ext} 
+
+	#rpm
+
+	echo pkginfo -l >>${logfile}
+	pkginfo -l >${resultfile}#solarissunpack${ext}  
+
+	#debian soft
+	echo dpkg >>${logfile}
+	dpkg -l >${resultfile}#dpkg${ext} 
+
+	#prtdiag
+	echo prtdiag >>${logfile}
+	prtdiag >${resultfile}#solarisprtdiag${ext}
+	;;
+AIX)
+	###########################################################
+	#  AIX
+	###########################################################
+	#uname
+
+	echo uname -a >>${logfile}
+	OSVERSION=`uname -a`
+	echo ${OSVERSION} >>${logfile}
+
+	#set
+	echo set >>${logfile}
+	set >${resultfile}#set${ext}
+
+	#partitions
+	echo df >>${logfile}
+	df >${resultfile}#aixpart${ext} 
+
+	#configuration reseaux
+	echo ifconfig >>${logfile}
+	ifconfig -a > ${resultfile}#aixif${ext}  
+
+	#memory
+	echo mem >>${logfile}
+	echo prtconf >>${logfile}
+	prtconf -m  > ${resultfile}#aixmem${ext}  
+
+	#X
+	Xfile="nofile"
+	if test -f "/etc/X11/XF86Config"; then
+		Xfile="/etc/X11/XF86Config"
+	elif test -f "/etc/X11/XF86Config-4"; then
+		Xfile="/etc/X11/XF86Config-4"
+	elif test -f "/etc/XF86Config"; then
+		Xfile="/etc/XF86Config"
+	elif test -f "/etc/XConfig"; then
+		Xfile="/etc/XConfig"
+	elif test -f "/usr/X11/lib/X11/XF86Config"; then
+		Xfile="/usr/X11/lib/X11/XF86Config"
+	fi
+
+	echo X >>${logfile}
+	echo ${Xfile} >>${logfile}
+	if test -f ${Xfile}; then 
+		cat ${Xfile} >${resultfile}#Xfile${ext}  
+	fi
+
+	#cpu
+	echo cpu >>${logfile}
+
+	echo prtconf  >>${logfile}
+	prtconf -cs > ${resultfile}#aixcpu${ext}  
+	uname -p >> ${resultfile}#aixcpu${ext}  
+
+	#dmidecode
+	#echo dmidecxode >>${logfile}
+	#dmidecode >${resultfile}#dmi${ext} 
+
+	#model
+	echo model >>${logfile}
+	uname -M > ${resultfile}#aixmodel${ext}  
+
+	#resolv.conf
+	echo resolv.conf >>${logfile}
+	cat /etc/resolv.conf >${resultfile}#resolv${ext} 
+
+	echo whoami >>${logfile}
+	whoami >${resultfile}#whoami${ext} 
+
+	#software
+	echo lslpp  >>${logfile}
+	lslpp -L >${resultfile}#aixsunpack${ext}  
+
+	#prtconf
+	echo prtconf >>${logfile}
+	prtconf >${resultfile}#aixprtconf${ext}
+	;;
+HP-UX)
+	###########################################################
+	#  HP-UNIX
+	###########################################################
+
+	#uname
+	echo uname -a >>${logfile}
+	OSVERSION=`uname -a`
+	echo ${OSVERSION} >>${logfile}
+
+	#set
+	echo set >>${logfile}
+	set >${resultfile}#set${ext}
+
+	#partitions
+	echo df >>${logfile}
+	df -k >${resultfile}#hp-uxpart${ext} 
+
+	#configuration reseaux
+	echo ifconfig >>${logfile}
+	ifconfig lan0 > ${resultfile}#hp-uxif${ext}  
+
+	#Specific 
+	echo ioscan >>${logfile}
+	ioscan -f > ${resultfile}#hp-uxioscan${ext} 
+
+	#model 
+	echo model >>${logfile}
+	model > ${resultfile}#hp-uxmodel${ext} 
+
+	echo mem >>${logfile}
+	#memory
+	#echo prtconf >>${logfile}
+	#prtconf | grep Memory  > ${resultfile}#solarismem${ext}  
+
+	#X
+	Xfile="nofile"
+	if test -f "/etc/X11/XF86Config"; then
+		Xfile="/etc/X11/XF86Config"
+	elif test -f "/etc/X11/XF86Config-4"; then
+		Xfile="/etc/X11/XF86Config-4"
+	elif test -f "/etc/XF86Config"; then
+		Xfile="/etc/XF86Config"
+	elif test -f "/etc/XConfig"; then
+		Xfile="/etc/XConfig"
+	elif test -f "/usr/X11/lib/X11/XF86Config"; then
+		Xfile="/usr/X11/lib/X11/XF86Config"
+	fi
+
+	echo X >>${logfile}
+	echo ${Xfile} >>${logfile}
+	if test -f ${Xfile}; then 
+		cat ${Xfile} >${resultfile}#Xfile${ext}  
+	fi
+
+	#cpu
+	#echo cpu >>${logfile}
+	#echo psrinfo -p -v >>${logfile}
+	#psrinfo -p -v > ${resultfile}#solariscpu${ext}  
+
+	#dmidecode
+	#echo dmidecxode >>${logfile}
+	#dmidecode >${resultfile}#dmi${ext} 
+
+	#resolv.conf
+	echo resolv.conf >>${logfile}
+	cat /usr/examples/bind/resolv.conf >${resultfile}#resolv${ext} 
+
+	echo whoami >>${logfile}
+	whoami >${resultfile}#whoami${ext} 
+
+	#rpm
+
+	#soft
+	echo swlist >>${logfile}
+	swlist >${resultfile}#hp-uxdpkg${ext} 
+
+	;;
+
+*)
+
+	###########################################################
+	#  LINUX
+	###########################################################
+
+	#uname
+	echo uname -sr >>${logfile}
+	OSVERSION=`uname -sr`
+	echo ${OSVERSION} >>${logfile}
+
+	#set
+	echo set >>${logfile}
+	set >${resultfile}#set${ext}
+
+	#partitions
+	echo df >>${logfile}
+	${df} ${dfoptions}>${resultfile}#part${ext} 
+
+	#configuration reseaux
+	echo ifconfig >>${logfile}
+	${ifconfig} >${resultfile}#if${ext}  
+
+	echo mem >>${logfile}
+	#memory
+	echo /proc/meminfo >>${logfile}
+	cat /proc/meminfo >${resultfile}#mem${ext}  
+
+	#X
+	Xfile=""
+	if test -f "/etc/X11/XF86Config"; then
+		Xfile="/etc/X11/XF86Config"
+	elif test -f "/etc/X11/XF86Config-4"; then
+		Xfile="/etc/X11/XF86Config-4"
+	elif test -f "/etc/XF86Config"; then
+		Xfile="/etc/XF86Config"
+	elif test -f "/etc/XConfig"; then
+		Xfile="/etc/XConfig"
+	elif test -f "/usr/X11/lib/X11/XF86Config"; then
+		Xfile="/usr/X11/lib/X11/XF86Config"
+	else
+		Xfile="EZVXFILENOTFOUND"
+	fi
+
+	echo X >>${logfile}
+	echo ${Xfile} >>${logfile}
+	if test -f ${Xfile}; then 
+		cat ${Xfile} >${resultfile}#Xfile${ext}  
+	fi
+
+	#cpu
+	echo cpu >>${logfile}
+	if test -f "/proc/cpuinfo"; then
+		echo /proc/cpuinfo >>${logfile}
+		cat /proc/cpuinfo > ${resultfile}#cpu${ext}  
+	fi
+
+	#dmidecode
+	echo dmidecode >>${logfile}
+	dmidecode >${resultfile}#dmi${ext} 
+
+	#Memory dump (bios)
+	#cat /dev/mem | head -c 2097152 > ${resultfile}#dump_memory${ext}
+
+	#resolv.conf
+	echo resolv.conf >>${logfile}
+	cat /etc/resolv.conf >${resultfile}#resolv${ext} 
+
+	echo whoami >>${logfile}
+	whoami >${resultfile}#whoami${ext} 
+	
+	#rpm
+	echo rpm >>${logfile}
+	rpm -qa --queryformat "%{name}\\t%{VERSION}.%{RELEASE}\\t%{SUMMARY}EZVVZE" >${resultfile}#rpm${ext}  
+
+	#debian soft
+	echo dpkg >>${logfile}
+	dpkg -l >${resultfile}#dpkg${ext} 
+
+	#find  commenter car long
+	#echo find >>${logfile}
+	#find / -perm +100 -type f -print >${resultfile}#find${ext} 
+	;;
+esac
+
+date >>${logfile}
+
