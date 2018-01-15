@@ -1,0 +1,62 @@
+#OS
+uname_result=`uname`
+
+case ${uname_result} in
+	Linux)
+		if test -f /etc/debian_version
+		then
+       			OS="Debian `cat /etc/debian_version`"
+		fi
+
+		if test -f /etc/mandrake-release
+		then
+        		OS="Mandrake"
+		fi
+
+		if test -f /etc/redhat-release
+		then
+			OS=`cat /etc/redhat-release`
+		fi
+
+		if test -f /etc/SuSe-release
+		then
+			OS=`cat /etc/SuSe-release`
+		fi
+
+		if test -f /etc/SuSE-release
+		then
+			OS=`cat /etc/SuSE-release|head -1`
+		fi
+
+		if test -f /etc/slackware-version
+		then
+			OS="Slackware"
+		fi
+
+		if test -f /etc/knoppix_version
+		then
+			OS="Knoppix"
+		fi
+
+		if test -f /etc/trustix-release
+		then
+			OS="Trustix"
+		fi
+
+		if test -f /etc/lsd-release
+		then
+			OS=`cat /etc/lsd-release`
+		fi
+		;;
+	AIX)
+		OS=`oslevel`
+		;;
+
+	SunOS)
+		#tbd
+		;;
+	HP-UX)
+		#tbd
+		;;
+esac
+echo $OS
